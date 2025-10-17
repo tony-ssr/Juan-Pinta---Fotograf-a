@@ -1,3 +1,8 @@
+// ===== JUAN PINTA FOTOGRAFÍA - CONFIGURACIÓN ASTRO =====
+// Desarrollado por: Antony Salcedo
+// Cliente: Juan Diego Bolaños (Juan Pinta Fotografía)
+// Descripción: Configuración del framework Astro para el sitio web
+
 // @ts-check
 import { defineConfig } from 'astro/config';
 

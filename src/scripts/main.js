@@ -1,4 +1,7 @@
 // ===== JUAN PINTA FOTOGRAFÍA - SCRIPTS PRINCIPALES =====
+// Desarrollado por: Antony Salcedo
+// Cliente: Juan Diego Bolaños (Juan Pinta Fotografía)
+// Descripción: Scripts interactivos para el sitio web de fotografía profesional
 
 // Esperar a que el DOM esté completamente cargado
 document.addEventListener('DOMContentLoaded', function() {
