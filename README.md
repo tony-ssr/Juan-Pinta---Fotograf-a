@@ -90,6 +90,19 @@ El sitio está configurado para deployment automático en **GitHub Pages** usand
 **Antony Salcedo**  
 Desarrollador Full Stack especializado en tecnologías web modernas
 
+## 📄 Licencia
+
+Este proyecto está licenciado bajo la **MIT License** - consulta el archivo [LICENSE](LICENSE) para más detalles.
+
+### ⚠️ Nota Importante sobre el Contenido
+
+Las fotografías, imágenes, logotipos y contenido visual incluidos en este sitio web son **propiedad exclusiva de Juan Diego Bolaños (Juan Pinta Fotografía)** y están protegidos por derechos de autor. 
+
+- ✅ **Código fuente**: Licencia MIT (uso libre)
+- ❌ **Contenido fotográfico**: Todos los derechos reservados
+
+El uso, reproducción o distribución del contenido visual requiere autorización expresa del propietario.
+
 ---
 
 *Desarrollado con ❤️ por Antony Salcedo para Juan Diego Bolaños - Juan Pinta Fotografía*
