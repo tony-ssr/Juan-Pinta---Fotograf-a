@@ -7,13 +7,23 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🎯 Inicializando Juan Pinta Website...');
     
-    // Inicializar todas las funcionalidades
+    // Inicializar iconos de Lucide
     initLucideIcons();
+    
+    // Inicializar menú móvil
     initMobileMenu();
+    
+    // Inicializar navegación suave
     initSmoothScrolling();
-    initPortfolioFilters();
-    initPortfolioLightbox();
+    
+    // Inicializar efectos de parallax
     initParallaxEffects();
+    
+    // Inicializar portafolio dinámico
+    dynamicPortfolio = new DynamicPortfolio();
+    dynamicPortfolio.loadPortfolioImages();
+    
+    // Inicializar animaciones al hacer scroll
     initScrollAnimations();
     
     console.log('✅ Todas las funcionalidades inicializadas correctamente');
@@ -365,30 +375,6 @@ function initPortfolioLightbox() {
     // Esta función ahora es manejada por DynamicPortfolio
     console.log('Lightbox del portafolio inicializado por DynamicPortfolio');
 }
-
-// ===== INICIALIZACIÓN PRINCIPAL ACTUALIZADA =====
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar iconos de Lucide
-    if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-    }
-    
-    // Inicializar menú móvil
-    initMobileMenu();
-    
-    // Inicializar navegación suave
-    initSmoothScrolling();
-    
-    // Inicializar efectos de parallax
-    initParallaxEffects();
-    
-    // Inicializar portafolio dinámico
-    dynamicPortfolio = new DynamicPortfolio();
-    dynamicPortfolio.loadPortfolioImages();
-    
-    // Inicializar animaciones al hacer scroll
-    initScrollAnimations();
-});
 
 // ===== EFECTO PARALLAX =====
 function initParallaxEffects() {
