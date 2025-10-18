@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initSmoothScrolling();
     initPortfolioFilters();
     initPortfolioLightbox();
-    initParallaxEffect();
+    initParallaxEffects();
     initScrollAnimations();
     
     console.log('✅ Todas las funcionalidades inicializadas correctamente');
@@ -82,186 +82,316 @@ function initSmoothScrolling() {
 }
 
 // ===== FILTROS DEL PORTAFOLIO =====
-function initPortfolioFilters() {
-    const filterButtons = document.querySelectorAll('.portfolio-filter');
-    const portfolioItems = document.querySelectorAll('.portfolio-item');
-    
-    if (filterButtons.length === 0 || portfolioItems.length === 0) {
-        console.warn('⚠️ Elementos del portafolio no encontrados');
-        return;
+// ===== PORTAFOLIO DINÁMICO =====
+class DynamicPortfolio {
+    constructor() {
+        this.portfolioData = {
+            familia: {
+                name: 'Momentos en Familia',
+                images: []
+            },
+            quinces: {
+                name: 'XV Años',
+                images: []
+            },
+            sesiones: {
+                name: 'Sesiones',
+                images: []
+            }
+        };
+        this.currentFilter = 'all';
+        this.gallery = document.getElementById('portfolio-gallery');
+        this.loadingIndicator = document.getElementById('portfolio-loading');
+        this.filterButtons = document.querySelectorAll('.portfolio-filter');
     }
-    
-    filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            // Remover clase active de todos los botones
-            filterButtons.forEach(btn => {
-                btn.classList.remove('active', 'bg-gray-900', 'text-white');
-                btn.classList.add('bg-white', 'text-gray-700');
-            });
-            
-            // Agregar clase active al botón clickeado
-            this.classList.add('active', 'bg-gray-900', 'text-white');
-            this.classList.remove('bg-white', 'text-gray-700');
-            
-            const filter = this.getAttribute('data-filter');
-            console.log('🔍 Filtrando por:', filter);
-            
-            // Filtrar elementos
-            portfolioItems.forEach(item => {
-                if (filter === 'all' || item.classList.contains(filter)) {
-                    // Mostrar elemento
-                    item.style.display = 'block';
-                    setTimeout(() => {
-                        item.style.opacity = '1';
-                        item.style.transform = 'scale(1)';
-                    }, 10);
-                } else {
-                    // Ocultar elemento
-                    item.style.opacity = '0';
-                    item.style.transform = 'scale(0.8)';
-                    setTimeout(() => {
-                        item.style.display = 'none';
-                    }, 300);
+
+    // Función para detectar automáticamente las imágenes en cada carpeta
+    async loadPortfolioImages() {
+        try {
+            // Mostrar indicador de carga
+            this.showLoading(true);
+
+            // Definir las imágenes manualmente basándose en la estructura conocida
+            this.portfolioData = {
+                familia: {
+                    name: 'Momentos en Familia',
+                    images: [
+                        'familia 1.jpg',
+                        'familia 2.jpg',
+                        'familia 3.jpg',
+                        'familia 4.jpg',
+                        'familia 5.jpg',
+                        'familia 6.jpg'
+                    ]
+                },
+                quinces: {
+                    name: 'XV Años',
+                    images: [
+                        'quinces 1.jpg',
+                        'quinces 2.jpg',
+                        'quinces 3.jpg'
+                    ]
+                },
+                sesiones: {
+                    name: 'Sesiones',
+                    images: [
+                        'sesiones 1.jpg',
+                        'sesiones 2.jpg',
+                        'sesiones 3.jpg',
+                        'sesiones 4.jpg',
+                        'sesiones 5.jpg',
+                        'sesiones 6.jpg'
+                    ]
                 }
+            };
+
+            // Generar la galería
+            this.generateGallery();
+            
+            // Configurar filtros
+            this.setupFilters();
+            
+            // Ocultar indicador de carga
+            this.showLoading(false);
+
+        } catch (error) {
+            console.error('Error cargando el portafolio:', error);
+            this.showError();
+        }
+    }
+
+    // Generar la galería HTML dinámicamente
+    generateGallery() {
+        let galleryHTML = '';
+        
+        // Iterar por cada categoría
+        Object.keys(this.portfolioData).forEach(category => {
+            const categoryData = this.portfolioData[category];
+            
+            categoryData.images.forEach((imageName, index) => {
+                const imagePath = `/Juan-Pinta---Fotograf-a/images/${category}/${imageName}`;
+                const altText = `${categoryData.name} - Imagen ${index + 1}`;
+                
+                galleryHTML += `
+                    <div class="portfolio-item ${category} group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300" data-category="${category}">
+                        <img src="${imagePath}" alt="${altText}" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
+                            <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <i data-lucide="zoom-in" class="w-8 h-8 text-white"></i>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <p class="text-white text-sm font-medium">${categoryData.name}</p>
+                        </div>
+                    </div>
+                `;
             });
         });
-    });
-    
-    console.log(`✅ Filtros del portafolio inicializados: ${filterButtons.length} botones, ${portfolioItems.length} elementos`);
-}
+        
+        this.gallery.innerHTML = galleryHTML;
+        
+        // Reinicializar iconos de Lucide
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+        
+        // Reinicializar lightbox
+        this.initPortfolioLightbox();
+    }
 
-// ===== LIGHTBOX PARA IMÁGENES DEL PORTAFOLIO =====
-function initPortfolioLightbox() {
-    const portfolioItems = document.querySelectorAll('.portfolio-item');
-    
-    portfolioItems.forEach(item => {
-        item.addEventListener('click', function() {
-            const img = this.querySelector('img');
-            if (img) {
-                openLightbox(img.src, img.alt);
+    // Configurar los filtros
+    setupFilters() {
+        this.filterButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Remover clase active de todos los botones
+                this.filterButtons.forEach(btn => {
+                    btn.classList.remove('active', 'bg-gray-900', 'text-white');
+                    btn.classList.add('bg-white', 'text-gray-700');
+                });
+                
+                // Agregar clase active al botón clickeado
+                button.classList.add('active', 'bg-gray-900', 'text-white');
+                button.classList.remove('bg-white', 'text-gray-700');
+                
+                // Obtener el filtro
+                const filter = button.getAttribute('data-filter');
+                this.filterGallery(filter);
+            });
+        });
+    }
+
+    // Filtrar la galería
+    filterGallery(filter) {
+        this.currentFilter = filter;
+        const items = this.gallery.querySelectorAll('.portfolio-item');
+        
+        items.forEach(item => {
+            const category = item.getAttribute('data-category');
+            
+            if (filter === 'all' || category === filter) {
+                item.style.display = 'block';
+                // Animación de entrada
+                setTimeout(() => {
+                    item.style.opacity = '1';
+                    item.style.transform = 'scale(1)';
+                }, 100);
+            } else {
+                item.style.opacity = '0';
+                item.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    item.style.display = 'none';
+                }, 300);
+            }
+        });
+    }
+
+    // Inicializar lightbox para las imágenes
+    initPortfolioLightbox() {
+        const portfolioItems = this.gallery.querySelectorAll('.portfolio-item');
+        
+        portfolioItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const img = item.querySelector('img');
+                const imgSrc = img.src;
+                const imgAlt = img.alt;
+                
+                this.openLightbox(imgSrc, imgAlt);
+            });
+        });
+    }
+
+    // Abrir lightbox
+    openLightbox(src, alt) {
+        // Crear overlay del lightbox
+        const lightbox = document.createElement('div');
+        lightbox.className = 'fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4';
+        lightbox.innerHTML = `
+            <div class="relative max-w-4xl max-h-full">
+                <img src="${src}" alt="${alt}" class="max-w-full max-h-full object-contain rounded-lg">
+                <button class="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors">
+                    <i data-lucide="x" class="w-8 h-8"></i>
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(lightbox);
+        
+        // Reinicializar iconos
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+        
+        // Cerrar lightbox
+        const closeBtn = lightbox.querySelector('button');
+        const closeLightbox = () => {
+            lightbox.remove();
+            document.body.style.overflow = 'auto';
+        };
+        
+        closeBtn.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                closeLightbox();
             }
         });
         
-        // Agregar cursor pointer para indicar que es clickeable
-        item.style.cursor = 'pointer';
-    });
-    
-    console.log(`✅ Lightbox inicializado para ${portfolioItems.length} imágenes`);
+        // Prevenir scroll del body
+        document.body.style.overflow = 'hidden';
+        
+        // Cerrar con ESC
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') {
+                closeLightbox();
+                document.removeEventListener('keydown', handleEsc);
+            }
+        };
+        document.addEventListener('keydown', handleEsc);
+    }
+
+    // Mostrar/ocultar indicador de carga
+    showLoading(show) {
+        if (this.loadingIndicator) {
+            this.loadingIndicator.style.display = show ? 'block' : 'none';
+        }
+    }
+
+    // Mostrar error
+    showError() {
+        this.gallery.innerHTML = `
+            <div class="col-span-full text-center py-12">
+                <div class="text-gray-500">
+                    <i data-lucide="alert-circle" class="w-12 h-12 mx-auto mb-4"></i>
+                    <p class="text-lg font-medium mb-2">Error al cargar el portafolio</p>
+                    <p class="text-sm">Por favor, intenta recargar la página</p>
+                </div>
+            </div>
+        `;
+        
+        this.showLoading(false);
+        
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    }
+
+    // Función para agregar nuevas imágenes dinámicamente (para futuro uso)
+    addNewImages(category, newImages) {
+        if (this.portfolioData[category]) {
+            this.portfolioData[category].images.push(...newImages);
+            this.generateGallery();
+        }
+    }
+
+    // Función para detectar automáticamente nuevas imágenes (simulada)
+    async detectNewImages() {
+        // Esta función podría expandirse en el futuro para detectar automáticamente
+        // nuevas imágenes en las carpetas usando APIs del servidor
+        console.log('Función para detectar nuevas imágenes - En desarrollo');
+    }
 }
 
-// ===== CREAR LIGHTBOX =====
-function openLightbox(imageSrc, imageAlt) {
-    // Crear overlay del lightbox
-    const lightbox = document.createElement('div');
-    lightbox.className = 'lightbox-overlay';
-    lightbox.innerHTML = `
-        <div class="lightbox-container">
-            <button class="lightbox-close" aria-label="Cerrar">&times;</button>
-            <img src="${imageSrc}" alt="" class="lightbox-image">
-        </div>
-    `;
-    
-    // Agregar estilos del lightbox
-    const lightboxStyles = `
-        .lightbox-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .lightbox-overlay.active {
-            opacity: 1;
-        }
-        
-        .lightbox-container {
-            position: relative;
-            max-width: 90%;
-            max-height: 90%;
-            text-align: center;
-        }
-        
-        .lightbox-image {
-            max-width: 100%;
-            max-height: 90vh;
-            object-fit: contain;
-            border-radius: 8px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-        
-        .lightbox-close {
-            position: absolute;
-            top: -40px;
-            right: 0;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 30px;
-            cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 50%;
-            transition: background-color 0.3s ease;
-        }
-        
-        .lightbox-close:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-        }
-    `;
-    
-    // Agregar estilos si no existen
-    if (!document.querySelector('#lightbox-styles')) {
-        const styleSheet = document.createElement('style');
-        styleSheet.id = 'lightbox-styles';
-        styleSheet.textContent = lightboxStyles;
-        document.head.appendChild(styleSheet);
-    }
-    
-    // Agregar lightbox al DOM
-    document.body.appendChild(lightbox);
-    
-    // Activar lightbox con animación
-    setTimeout(() => {
-        lightbox.classList.add('active');
-    }, 10);
-    
-    // Eventos para cerrar lightbox
-    const closeBtn = lightbox.querySelector('.lightbox-close');
-    
-    function closeLightbox() {
-        lightbox.classList.remove('active');
-        setTimeout(() => {
-            document.body.removeChild(lightbox);
-        }, 300);
-    }
-    
-    closeBtn.addEventListener('click', closeLightbox);
-    lightbox.addEventListener('click', function(e) {
-        if (e.target === lightbox) {
-            closeLightbox();
-        }
-    });
-    
-    // Cerrar con tecla Escape
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeLightbox();
-        }
-    });
-    
-    console.log('🖼️ Lightbox abierto para:', imageAlt);
+// Instancia global del portafolio dinámico
+let dynamicPortfolio;
+
+// ===== INICIALIZACIÓN ACTUALIZADA =====
+function initPortfolioFilters() {
+    // Esta función ahora es manejada por DynamicPortfolio
+    console.log('Filtros del portafolio inicializados por DynamicPortfolio');
 }
+
+function initPortfolioLightbox() {
+    // Esta función ahora es manejada por DynamicPortfolio
+    console.log('Lightbox del portafolio inicializado por DynamicPortfolio');
+}
+
+// ===== INICIALIZACIÓN PRINCIPAL ACTUALIZADA =====
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar iconos de Lucide
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+    
+    // Inicializar menú móvil
+    initMobileMenu();
+    
+    // Inicializar navegación suave
+    initSmoothScrolling();
+    
+    // Inicializar efectos de parallax
+    initParallaxEffects();
+    
+    // Inicializar portafolio dinámico
+    dynamicPortfolio = new DynamicPortfolio();
+    dynamicPortfolio.loadPortfolioImages();
+    
+    // Inicializar animaciones al hacer scroll
+    initScrollAnimations();
+});
 
 // ===== EFECTO PARALLAX =====
-function initParallaxEffect() {
+function initParallaxEffects() {
     const heroSection = document.getElementById('inicio');
     
     if (heroSection) {
@@ -330,6 +460,7 @@ window.JuanPintaWebsite = {
     initSmoothScrolling,
     initPortfolioFilters,
     initPortfolioLightbox,
-    initParallaxEffect,
-    initScrollAnimations
+    initParallaxEffects,
+    initScrollAnimations,
+    DynamicPortfolio
 };
